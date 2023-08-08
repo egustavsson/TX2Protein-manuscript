@@ -22,10 +22,18 @@ This repository contains the code used for the analysis in the manuscript *Prote
 
 ## Data
 
-The data used in the
+### Gene set
 
-###
+We got the the Early onset or syndromic epilepsy (Version 4.77) from Genomics England PanelApp. We only included Green genes, these are the genes with the highest vidence. This panel is used as a virtual panel to analyse genome or exome data in the NHS Genomic Medicine Service; the panel will routinely be applied for clinical indication 'R59 Early onset or syndromic epilepsy' but can also be used as part of the analysis for a broader clinical presentation, where relevant.
 
+This panel is availabel through https://panelapp.genomicsengland.co.uk/panels/402/ or can be donwloaded like this:
+
+```bash
+wget https://panelapp.genomicsengland.co.uk/panels/402/download/34/
+
+```
+
+### Long-read RNA-seq
 
 These analyses were performed using publicly available long-read RNA seq data, consisting of PacBio IsoSeq from 9 frontal cortex samples.
   
