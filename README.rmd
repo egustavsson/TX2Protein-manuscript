@@ -1,0 +1,84 @@
+---
+  output: github_document
+---
+  
+  <!-- README.md is generated from README.Rmd. Please edit that file -->
+  
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# TX2Protein - Transcript to protein
+
+## Background
+
+This repository contains the code used for the analysis in the manuscript *Protein isoform detection from long-read RNA-seq data*. This manuscript describes our software [NAME OF SOFTWARE], a simplified method for intergating protein coding potential of full-length transcript structures in mass spectrometry data. [NAME OF SOFTWARE] only requires a `GTF/GFF` file and the raw proteomic dataset, typically from The ProteomeXchange Consortium, and uses [`MetaMorpheus`](https://github.com/smith-chem-wisc/MetaMorpheus) for protein identifications. 
+
+
+## Data
+
+The data used in the
+
+###
+
+
+These analyses were performed using publicly available long-read RNA seq data, consisting of PacBio IsoSeq from 9 frontal cortex samples.
+  
+### ENCODE long-read data
+This consists of publicly available frontal cortex samples from [ENCODE](https://www.encodeproject.org/rna-seq/long-read-rna-seq/). All samples were sequenced on the PacBio Sequel II platform and processed with the ENCODE DCC deployment of the [TALON pipeline](https://github.com/ENCODE-DCC/long-read-rna-pipeline). We downloaded the TSV and GTF files from the following samples: 
+
+|      Sample      |    Disease status   |       Tissue           |  Sex   |       Age         |
+|:-----------------|:--------------------|:-----------------------|:-------|:------------------|
+| [ENCSR462COR][8] | Alzheimer's disease | middle frontal area 46 | female | 90 or above years |
+| [ENCSR169YNI][9] | Control             | middle frontal area 46 | female | 90 or above years |
+| [ENCSR257YUB][10]| Alzheimer's disease | middle frontal area 46 | male   | 90 or above years |
+| [ENCSR690QHM][11]| Alzheimer's disease | middle frontal area 46 | female | 90 or above years |
+| [ENCSR316ZTD][12]| Alzheimer's disease | middle frontal area 46 | female | 90 or above years |
+| [ENCSR697ASE][13]| Alzheimer's disease | middle frontal area 46 | female | 90 or above years |
+| [ENCSR094NFM][14]| Control             | middle frontal area 46 | female | 90 or above years |
+| [ENCSR463IDK][15]| Control             | middle frontal area 46 | female | 79                |
+| [ENCSR205QMF][16]| Control             | middle frontal area 46 | female | 88                |
+
+[8]: https://www.encodeproject.org/experiments/ENCSR462COR/
+[9]: https://www.encodeproject.org/experiments/ENCSR169YNI/
+[10]: https://www.encodeproject.org/experiments/ENCSR257YUB/
+[11]: https://www.encodeproject.org/experiments/ENCSR690QHM/
+[12]: https://www.encodeproject.org/experiments/ENCSR316ZTD/
+[13]: https://www.encodeproject.org/experiments/ENCSR697ASE/
+[14]: https://www.encodeproject.org/experiments/ENCSR094NFM/
+[15]: https://www.encodeproject.org/experiments/ENCSR463IDK/
+[16]: https://www.encodeproject.org/experiments/ENCSR205QMF/
+
+This data can be downloaded using this [script](./scripts/00a_download_ENCODE_files.sh). It will calculate the total size of the download and allow a Y/N choice prior to downloading. Usage:
+
+```
+# first give the execute permission to the script:
+chmod +x 00a_download_ENCODE_files.sh
+
+# then run it:
+./00a_download_ENCODE_files.sh /path/to/directory/
+```
+
+This data can be filtered using this [script](./scripts/00b_filter_ENCODE_long_read.sh). Usage: 
+
+```
+$ bash 00b_filter_ENCODE_long_read.sh --directory /path/to/directory/ --output /path/to/output/ --gene ENSG00000136156.13
+
+```
+
+## Code contents
+
+Within this repository you will find:
+  
+  | Directory | Description |
+  | --------- | --------------------------------------------------------------------------- |
+  | [docs](docs) | Contains all `.Rmd`s and their corresponding `.html`s describing analyses performed for this project. |
+  | [logs](logs) | For any scripts that were run outside of an `.Rmd` (e.g. scripts from the [scripts](scripts) directory), a log file was recorded and can be accessed here. |
+  | [raw_data](raw_data)| Data used for the analysis. Most will not be available due to size. |
+  | [results](results) | Results from all analyses. |
+  | [scripts](scripts) | Contains analysis scripts. Each script contains a one-line description and is also referenced in its corresponding `.Rmd`. |
