@@ -18,22 +18,21 @@ if [[ -z $directory || -z $output_directory || -z $gene_file ]]; then
     exit 1
 fi
 
-# Create a temporary file for storing the gene IDs
-temp_gene_file=$(mktemp)
+# Read gene IDs from the gene file into an array
+mapfile -t gene_ids < <(grep -v '^$' "$gene_file")  # Remove blank lines
 
-# Extract gene IDs from the TSV file and save them to the temporary file
-awk -F'\t' '{print $1}' "$gene_file" > "$temp_gene_file"
+# Generate a pattern for grep using gene IDs
+grep_pattern=$(IFS="|"; echo "${gene_ids[*]}")
 
+# Process GTF files
 for i in "$directory"*.gtf; do
     output_file="${output_directory}$(basename "$i")"
-    grep -Ff "$temp_gene_file" "$i" > "$output_file"
+    grep -E "$grep_pattern" "$i" > "$output_file"
 done
 
+# Process TSV files
 for i in "$directory"*.tsv; do
     output_file="${output_directory}$(basename "$i")"
     head -n 1 "$i" > "$output_file"
-    grep -Ff "$temp_gene_file" "$i" >> "$output_file"
+    grep -E "$grep_pattern" "$i" >> "$output_file"
 done
-
-# Clean up the temporary gene file
-rm "$temp_gene_file"

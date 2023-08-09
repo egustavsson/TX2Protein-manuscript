@@ -31,8 +31,8 @@ else
     exit 1
 fi
 
-# Extract the desired column and remove the header
-awk -F'\t' '{print $22}' "$downloaded_file" | tail -n +2 > "$gene_set_file"
+# Extract the desired column, remove empty lines, and remove the header
+awk -F'\t' '{print $3}' "$downloaded_file" | awk NF | tail -n +2 > "$gene_set_file"
 
 if [ $? -eq 0 ]; then
     echo "Extracted gene set column and saved to gene_set.tsv."

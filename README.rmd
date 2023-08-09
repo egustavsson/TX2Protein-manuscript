@@ -65,12 +65,14 @@ bash 00a_get_gene_set.sh /path/to/output/directory "https://panelapp.genomicseng
 This will store the gene panel and a `genes_set.tsv` file which looks like this:
 
 ```bash
-ENSG00000157087
-ENSG00000212355
-ENSG00000245678
+AARS
+ABAT
+ACOX1
+ACTL6B
+ADAR
 ```
 
-**IMPORTANT!** This script assumes that column 22 has the desired ensembl IDs which was the case when this analysis was run.
+**IMPORTANT!** This script filters on gene names and assumes this information is cintained in column 3.
 
 ### Process long-read RNA-seq data
 
