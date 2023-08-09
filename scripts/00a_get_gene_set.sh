@@ -32,7 +32,7 @@ else
 fi
 
 # Extract the desired column and remove the header
-awk -F'\t' '{print $3}' "$downloaded_file" | tail -n +2 > "$gene_set_file"
+awk -F'\t' '{print $22}' "$downloaded_file" | tail -n +2 > "$gene_set_file"
 
 if [ $? -eq 0 ]; then
     echo "Extracted gene set column and saved to gene_set.tsv."

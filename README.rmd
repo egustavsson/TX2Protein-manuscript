@@ -59,10 +59,7 @@ This consists of 9 publicly available frontal cortex samples from [ENCODE](https
 Downloading the desired panel from PanelApp, and generation of the `genes_set.tsv` used as input later, can be done by running [`00a_get_gene_set.sh`](./scripts/00a_get_gene_set.sh). Usage:
 
 ```
-# first give the execute permission to the script:
-chmod +x 00a_get_gene_set.sh
-
-00a_get_gene_set.sh.sh /path/to/output/directory "https://panelapp.genomicsengland.co.uk/panels/402/download/34/"
+bash 00a_get_gene_set.sh /path/to/output/directory "https://panelapp.genomicsengland.co.uk/panels/402/download/34/"
 ```
 
 This will store the gene panel and a `genes_set.tsv` file which looks like this:
@@ -72,6 +69,8 @@ ENSG00000157087
 ENSG00000212355
 ENSG00000245678
 ```
+
+**IMPORTANT!** This script assumes that column 22 has the desired ensembl IDs which was the case when this analysis was run.
 
 ### Process long-read RNA-seq data
 
