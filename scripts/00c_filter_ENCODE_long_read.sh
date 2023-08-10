@@ -14,7 +14,7 @@ done
 # Validate required parameters
 if [[ -z $directory || -z $output_directory || -z $gene_file ]]; then
     echo "Error: Missing required parameter(s)."
-    echo "Usage: bash script_name.sh --directory /path/to/directory/ --output /path/to/output/ --gene-file genes.tsv"
+    echo "Usage: bash 00cfilter_ENCODE_long_read.sh --directory /path/to/directory/ --output /path/to/output/ --gene-file genes.tsv"
     exit 1
 fi
 
