@@ -137,6 +137,8 @@ To filter the data to only include the genes of interest (output from `genes_set
 
 ### 3. Get unique transcripts across samples
 
+When retrieving novel transcripts through long-read RNA-seq, their IDs are generated in the order they are called. Consequently, IDs for the same transcript can vary among different samples. To ensure a consistent unique ID for all transcripts across samples (in `GTF` files), we execute run [`01a_process_ENCODE_transcript_structures.R`](./scripts/01a_process_ENCODE_transcript_structures.R) to get a set of unique transcripts.
+
 ## Contents
 
 Within this repository you will find:
