@@ -123,7 +123,26 @@ uniqueTranscripts <- function(data, exon_type) {
   final_df <- all_data_distinct %>% 
     dplyr::left_join(., dplyr::select(summarized_data, matching_id, unique_id, all_transcripts), by = c("transcript_id" = "matching_id")) %>% 
     dplyr::mutate(transcript_id = unique_id) %>% 
-    dplyr::select(-c(unique_id, transcript_name, talon_transcript, exon_id, talon_exon, talon_gene)) %>% # remove these columns as otherwise distinct will not work since they have different ids
+    dplyr::select(-c(unique_id, 
+                     transcript_name, 
+                     talon_transcript, 
+                     exon_id, 
+                     talon_exon, 
+                     talon_gene,
+                     ISM.prefix_to_IDs,
+                     ISM.prefix_transcript,
+                     ISM_to_IDs,
+                     ISM.suffix_to_IDs,
+                     ISM.suffix_transcript,
+                     protein_id,
+                     source.1,
+                     tag,
+                     transcript_support_level,
+                     havana_transcript,
+                     genomic_transcript,
+                     NNC_transcript,
+                     ISM_transcript,
+                     NIC_transcript)) %>% # remove these columns as otherwise distinct will not work since they have different ids
     distinct()
   
   return(final_df)

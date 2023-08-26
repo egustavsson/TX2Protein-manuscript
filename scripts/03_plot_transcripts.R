@@ -11,7 +11,7 @@ suppressPackageStartupMessages({
 
 unique_transcripts <- readRDS(here::here("results", "unique_transcripts.rds"))
 
-expression_RPM <- readRDS(here::here("results", "expression_RPM.rds"))
+expression_RPM <- readRDS(here::here("results", "expression_gene_set.rds"))
 
 # Main --------------------------------------------------------------------
 

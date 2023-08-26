@@ -23,8 +23,8 @@ transcripts_to_include <-
   dplyr::select(annot_gene_id, unique_id, transcript_novelty, reads) %>% 
   dplyr::filter(transcript_novelty %in% c("NNC", "NIC"), # only include transcripts with novel ORFs
                 reads > 1) %>% # only include transcripts with at least 2 reads
-  distinct() %>% 
-  .$unique_id
+  .$unique_id %>% 
+  unique()
 
 # Final transcript file
 transcripts_novel_ORF <- 
@@ -35,3 +35,10 @@ transcripts_novel_ORF <-
 
 rtracklayer::export(transcripts_novel_ORF, 
                     here::here("results", "transcripts_novel_ORF.gff"), format = "GFF3")
+
+write.table(data.frame(transcripts_to_include), 
+            file = here::here("results", "transcripts.tsv"), sep = "\t", 
+            col.names = FALSE, 
+            row.names = FALSE, 
+            quote = FALSE)
+

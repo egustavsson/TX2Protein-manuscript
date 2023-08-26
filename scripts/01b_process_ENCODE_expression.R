@@ -78,8 +78,6 @@ expression_gene_set <-
   ) %>% 
   dplyr::select(-c(transcript_ID, annot_transcript_name, annot_transcript_id)) # remove these columns as otherwise distinct will not work since they have different ids
 
-
-
 # Save data ---------------------------------------------------------------
 
 saveRDS(expression_gene_set, file = here::here("results", "expression_gene_set.rds"))

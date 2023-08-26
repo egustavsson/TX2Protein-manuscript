@@ -1,4 +1,4 @@
-# Make a histogram as a stacked bar chart with idfferent transcript categories
+# Make a histogram as a stacked bar chart with different transcript categories
 
 
 # Load libraries ----------------------------------------------------------
@@ -10,27 +10,50 @@ suppressPackageStartupMessages({
 
 # Load data ---------------------------------------------------------------
 
-unique_transcripts <- readRDS(here::here("results", "unique_transcripts.rds"))
-
-expression_RPM <- readRDS(here::here("results", "expression_RPM.rds"))
+expression_gene_set <- readRDS(here::here("results", "expression_gene_set.rds"))
 
 # Main --------------------------------------------------------------------
 
-# Get unique IDs as created by 01a_process_ENCODE_transcripts.R and 02....R
-transcript_IDs <- 
-  unique_transcripts %>% 
-  dplyr::filter(type == "transcript") %>% 
-  dplyr::select(transcript_id, all_transcripts)
+# fill colour to use
+fill_colour <- c("Known" = "#4d9221",
+                 "ISM" = "#74add1",
+                 "NIC" = "#d53e4f",
+                 "NNC" = "#b2abd2")
 
+transcript_category_plot <-
+  expression_gene_set %>% 
+  dplyr::select(annot_gene_name, transcript_novelty, unique_id) %>% 
+  distinct() %>% 
+  group_by(annot_gene_name, transcript_novelty) %>%
+  summarize(count = n_distinct(unique_id)) %>% 
+  dplyr::filter(transcript_novelty != "Genomic") %>% 
 
-expression_RPM %>% 
-  dplyr::mutate(annot_transcript_id = str_extract(annot_transcript_id, "[^.]+"),
-                unique_id = case_when(annot_transcript_id %in% transcript_IDs$all_transcripts)) %>% # to finish
-  dplyr::select(-c(gene_ID, transcript_ID, annot_transcript_name))
-
+  # Plot histogram
+  ggplot(aes(
+    x = count, 
+    fill = factor(transcript_novelty, 
+                  levels = c("Known", "ISM", "NIC", "NNC")))) + 
+  geom_histogram(colour = "black",
+                 bins = 100) +
+  labs(x = "Genes",
+       y = "Distribution of transcripts per category",
+       fill = "Transcript category") +
+  scale_fill_manual(values = fill_colour) +
+  theme_light() +
+  theme(legend.position = c(0.8, 0.8),
+        legend.background = element_rect(fill = alpha("white", 0.0)),
+        axis.title = element_text(size = 18),
+        axis.text = element_text(size = 14))
 
 
 # Save data ---------------------------------------------------------------
 
-rtracklayer::export(transcripts_novel_ORF, 
-                    here::here("results", "transcripts_novel_ORF.gff"), format = "GFF3")
+ggsave(
+  plot = transcript_category_plot, 
+  filename = "transcript_category_plot.png", 
+  path = here::here("results", "plots"), 
+  width = 8, 
+  height = 6, 
+  dpi = 600, 
+  bg = "white"
+)
