@@ -15,14 +15,7 @@ suppressPackageStartupMessages({
 
 # list all files
 gtf_list <-
-  list.files(here::here("results"), pattern = "*.gtf", full.names = TRUE)
-
-tsv_list <-
-  list.files(here::here("results"), pattern = "*.tsv", full.names = TRUE)
-
-# Since the panel data files might be in the same directory with the same extension they need to be excluded
-tsv_list <-
-  tsv_list[!grepl(paste(c("gene_set.tsv", "panel_data.tsv"), collapse = "|"), tsv_list)]
+  list.files(here::here("results", "ENCODE"), pattern = "*.gtf", full.names = TRUE)
 
 # Load data ---------------------------------------------------------------
 
@@ -35,20 +28,6 @@ sample_gtf <-
     rtracklayer::import(x) 
     }
   )
-
-# Expression data
-expression_data <- 
-  lapply(tsv_list, function(x) {
-    
-    read.table(x, header = TRUE, sep = "\t") %>% 
-      dplyr::mutate(sample = gsub('.tsv', '', basename(x))) %>% 
-      rename_if(startsWith(names(.), "rep"), ~"reads")
-    
-  }) %>%
-  bind_rows(!!!.) %>% 
-  left_join(., sample_info, by = c("sample" = "sample")) 
-
-
 
 # Functions ---------------------------------------------------------------
 

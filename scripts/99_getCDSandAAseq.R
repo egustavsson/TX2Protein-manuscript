@@ -96,18 +96,21 @@ get_sequences <- function(gtf){
   
   # Get sequences
   NT_seq <-
-    
-    # Start by adding nucleotide sequwnces for all exons, including UTRs
-    subset(gtf, type == "exon") %>% 
-    split(., mcols(.)$transcript_id) %>% 
+    subset(gtf, type == "exon") %>%
+    split(., mcols(.)$transcript_id) %>%
     lapply(., function(x) {
-      x %>% 
-        sort() %>% 
-        getSeq(Hsapiens, .) %>% paste(., collapse = "") 
-      
-    }
-    ) %>% utils::stack() %>% 
-    setNames(c("NT_seq", "Transcript")) %>% 
+      if (unique(strand(x)) == "-") {
+        x %>%
+          sort(., decreasing = TRUE) %>%  # Sort in decreasing order
+          getSeq(Hsapiens, .) %>% paste(., collapse = "")
+      } else {
+        x %>%
+          sort(.) %>%  # Sort in increasing order
+          getSeq(Hsapiens, .) %>% paste(., collapse = "")
+      }
+    }) %>%
+    utils::stack() %>%
+    setNames(c("NT_seq", "Transcript")) %>%
     subset(., select=c("Transcript", "NT_seq")) 
   
   # ORF prediction, get ORF sequences and translate to AA sequences. 
@@ -118,7 +121,9 @@ get_sequences <- function(gtf){
   
   for (i in 1:NROW(NT_seq)) {
     ORF_range <- ORFik::findORFs(
-      NT_seq$NT_seq[i], longestORF = TRUE, startCodon = "ATG") %>%
+      NT_seq$NT_seq[i], 
+      longestORF = TRUE, 
+      startCodon = "ATG") %>%
       unlist() %>%
       data.frame()
     
