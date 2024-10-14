@@ -5,7 +5,7 @@
 
 ## Background
 
-This repository contains the code used for the analysis in the manuscript *Protein isoform detection from long-read RNA-seq data*. This manuscript describes our software \[NAME OF SOFTWARE\], a simplified method for intergating protein coding potential of full-length transcript structures in mass spectrometry data. \[NAME OF SOFTWARE\] only requires a `GTF/GFF` file and the raw proteomic dataset, typically from The ProteomeXchange Consortium, and uses [`MetaMorpheus`](https://github.com/smith-chem-wisc/MetaMorpheus) for protein identifications.
+This repository contains the code used for the analysis in the manuscript *Protein isoform detection from long-read RNA-seq data*. This manuscript describes our software [`TX2P`](https://github.com/MurphyDavid/TX2P.git), a simplified method for intergating protein coding potential of full-length transcript structures in mass spectrometry data. `TX2P` only requires a `GTF/GFF` file and the raw proteomic dataset, typically from The ProteomeXchange Consortium, and uses [`MetaMorpheus`](https://github.com/smith-chem-wisc/MetaMorpheus) for protein identifications.
 
 ## Data
 
