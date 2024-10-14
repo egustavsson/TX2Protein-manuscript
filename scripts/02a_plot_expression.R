@@ -27,6 +27,7 @@ no_samples_expressed_plot <-
   geom_text(aes(label = n_genes), 
             position = position_dodge(width=0.9), vjust= -0.6, size = 6) +
   scale_x_continuous(breaks = c(1:9)) +
+  geom_vline(xintercept = 8.5, linetype = "dashed", color = "black", size = 0.7) + # Add dashed line
   labs(x = "",
        y = "Number of genes") +
   ylim(0, 520) +
@@ -55,6 +56,7 @@ expression_per_gene_plot <-
              group = n_samples)) + 
   geom_boxplot(colour = "black", fill = "lightgrey", show.legend = F, outlier.shape = NA) +
   scale_x_continuous(breaks = c(1:9)) +
+  geom_vline(xintercept = 8.5, linetype = "dashed", color = "black", size = 0.7) + # Add dashed line
   labs(x = "No. samples expressed in (total = 9)",
        y = "Expression (RPM)") +
   ylim(0, 100) +
