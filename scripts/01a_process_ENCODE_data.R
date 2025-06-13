@@ -53,12 +53,12 @@ uniqueTranscripts <- function(data, exon_type) {
   all_data <- if (inherits(data, "GRanges")) {
     as.data.frame(data)
   } else if (is.list(data)) {
-    do.call(rbind.fill, lapply(data, as.data.frame))
+    do.call(plyr::rbind.fill, lapply(data, as.data.frame))
   } else {
     data
   }
   
-  all_data_distinct <- distinct(all_data)
+  all_data_distinct <- dplyr::distinct(all_data)
   all_data_filtered <- all_data_distinct[all_data_distinct$type == exon_type, ]
   all_data_grouped <- split(all_data_filtered, all_data_filtered$transcript_id)
   
@@ -77,12 +77,12 @@ uniqueTranscripts <- function(data, exon_type) {
   string_df <- string_df[order(string_df$transcript_str), ]
   row.names(string_df) <- NULL
   
-  grouped_data <- group_by(string_df, transcript_str)
+  grouped_data <- dplyr::group_by(string_df, transcript_str)
   summarized_data <- summarize(grouped_data, all_transcripts = paste(transcript_id, collapse = ","))
   summarized_data <- dplyr::mutate(summarized_data, 
-                                   unique_id = str_extract(all_transcripts, "^[^,]*"),
+                                   unique_id = stringr::str_extract(all_transcripts, "^[^,]*"),
                                    matching_id = all_transcripts) %>% 
-    separate_rows(matching_id, sep = ",")
+    tidyr::separate_rows(matching_id, sep = ",")
   
   final_df <- all_data_distinct %>% 
     dplyr::left_join(., dplyr::select(summarized_data, matching_id, unique_id, all_transcripts), by = c("transcript_id" = "matching_id")) %>% 
@@ -101,13 +101,14 @@ uniqueTranscripts <- function(data, exon_type) {
                      protein_id,
                      source.1,
                      tag,
+                     ccdsid,
                      transcript_support_level,
                      havana_transcript,
                      genomic_transcript,
                      NNC_transcript,
                      ISM_transcript,
                      NIC_transcript)) %>% 
-    distinct()
+    dplyr::distinct()
   
   return(final_df)
 }
@@ -141,6 +142,7 @@ unique_transcripts <- uniqueTranscripts(data = sample_gtf, exon_type = "exon")
 
 # Save unique transcripts
 saveRDS(unique_transcripts, file = here::here("results", "unique_transcripts.rds"))
+
 
 # Process expression data -------------------------------------------------
 

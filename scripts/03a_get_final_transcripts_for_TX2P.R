@@ -15,27 +15,52 @@ unique_transcripts <- readRDS(here::here("results", "unique_transcripts.rds"))
 
 expression_gene_set <- readRDS(here::here("results", "expression_gene_set.rds"))
 
+# Functions ---------------------------------------------------------------
+
+TXfilter <- function(data, gene_expression_sample_count, min_read_count, allowed_novelty_types, min_transcript_occurrences) {
+  
+  # Step 1: Identify genes expressed in at least gene_expression_sample_count samples
+  selected_genes <- 
+    data %>%
+    dplyr::select(annot_gene_id, sample) %>%
+    group_by(annot_gene_id) %>%
+    summarize(sample_count = n_distinct(sample), .groups = "drop") %>%
+    dplyr::filter(sample_count >= gene_expression_sample_count) %>%
+    dplyr::pull(annot_gene_id)
+  
+  # Step 2: Identify transcripts found in at least min_transcript_occurrences samples
+  selected_transcripts <- 
+    data %>%
+    dplyr::select(unique_id, sample) %>%
+    group_by(unique_id) %>%
+    summarize(transcript_occurrences = n_distinct(sample), .groups = "drop") %>%
+    dplyr::filter(transcript_occurrences >= min_transcript_occurrences) %>%
+    dplyr::pull(unique_id)
+  
+  # Step 3: Filter transcripts of interest
+  filtered_transcripts <- 
+    data %>%
+    dplyr::filter(
+      annot_gene_id %in% selected_genes,
+      transcript_novelty %in% allowed_novelty_types, 
+      reads >= min_read_count,
+      unique_id %in% selected_transcripts
+    )
+  
+  return(filtered_transcripts)
+}
+
 # Main --------------------------------------------------------------------
 
-# Only include genes expressed across all samples
-genes_to_include <- 
-  expression_gene_set %>% 
-  dplyr::select(annot_gene_id, sample) %>% 
-  group_by(annot_gene_id) %>%
-  summarize(n_samples = n_distinct(sample)) %>%
-  dplyr::filter(n_samples == 9)
-
-# Filter to only include transcripts of interest wit novel ORFs from genes of interest
-transcripts_to_include <- 
-  expression_gene_set %>% 
-  dplyr::select(annot_gene_id, unique_id, transcript_novelty, reads) %>% 
-  dplyr::filter(annot_gene_id %in% genes_to_include$annot_gene_id,
-                transcript_novelty %in% c("NNC", "NIC"), # only include transcripts with novel ORFs
-                reads > 1) %>% # only include transcripts with at least 2 reads
-  .$unique_id %>% 
-  unique()
-
-# Final transcript file
+transcripts_to_include <- TXfilter(
+  data = expression_gene_set,
+  gene_expression_sample_count = 9, 
+  min_transcript_occurrences = 1,
+  min_read_count = 2,
+  allowed_novelty_types = c("NNC", "NIC")
+)
+  
+# Final transcript GFF file
 transcripts_novel_ORF <- 
   unique_transcripts %>% 
   dplyr::filter(transcript_id %in% transcripts_to_include)
