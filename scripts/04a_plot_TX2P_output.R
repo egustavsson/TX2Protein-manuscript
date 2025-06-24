@@ -9,7 +9,7 @@ suppressPackageStartupMessages({
   library(tidyverse)
   library(readxl)
   library(here)
-  library(ggExtra)
+  library(ggrepel)
   library(ggforce)
   library(ggrepel)
 })
@@ -28,9 +28,7 @@ args <- list(
 # TX2P_count contains the number of times each transcript had a positive peptide detection
 # TX2P_merged has all the data
 TX2P_out <- list(
-  TX2P_count = read_excel(args$path_to_TX2P, sheet = "Count_Found_in_mass_Datasets", col_names = c("data_set", "Transcript_ID", "occurences")),
-  TX2P_merged = read_excel(args$path_to_TX2P, sheet = "merged_data"),
-  TX2P_ORF = read_excel(args$path_to_TX2P, sheet = "ORFS")
+  TX2P_count = read_excel(args$path_to_TX2P, sheet = "Count_Found_in_mass_Datasets", col_names = c("Transcript_ID", "occurences"))
   )
 
 # This data is generated through 01b_process_ENCODE_expression.R
@@ -132,13 +130,17 @@ transcripts_MS_support_plot <-
   distinct() %>% 
   group_by(MS_support) %>%
   summarize(n_transcripts = n_distinct(unique_id), .groups = "drop") %>%
-  mutate(fill_color = ifelse(MS_support, "#8ed6ffff", "#d7d7d780")) %>%  # Define fill colors before ggplot
+  mutate(
+    perc = 100 * n_transcripts / sum(n_transcripts),                
+    label = paste0(n_transcripts, " (", sprintf("%.1f", perc), "%)"),  
+    fill_color = ifelse(MS_support, "#8ed6ffff", "#d7d7d780")
+  ) %>%
   
   ggplot(aes(x = MS_support, y = n_transcripts, fill = fill_color)) + 
   geom_col(colour = "black", width = 0.6) + 
-  geom_text(aes(label = n_transcripts), vjust = -0.6, size = 5) +
+  geom_text(aes(label = label), vjust = -0.6, size = 5) +
   labs(title = "Transcripts with MS support",
-       x = "Supported by mass spectometry data", 
+       x = "Supported by mass spectrometry data", 
        y = "No. transcripts") +
   scale_fill_identity() +  # Use identity scale to apply pre-defined colors
   theme_bw() +
@@ -152,6 +154,7 @@ transcripts_MS_support_plot <-
     panel.grid.minor = element_blank(),
     panel.border = element_rect(colour = "black", fill=NA, linewidth=1.5)
   )
+
 
 # --------------------------------------------
 # Plot cummulative MS support
@@ -210,43 +213,6 @@ cumulative_MS_support_plot <-
     axis.text = element_text(face = "bold", size = 12)
   )
 
-# --------------------------------------------
-# Plot RPM cut-off data
-# --------------------------------------------
-
-# Create a flag for occurences > 0
-aggregated_data <- aggregated_data %>%
-  mutate(occurence_flag = ifelse(occurences > 0, 1, 0))
-# Define RPM thresholds (similar to your function)
-threshs <- seq(from = 0, to = ceiling(max(aggregated_data$RPM)), by = 0.2)  # Start at 1, step by 1, up to max RPM
-# Create a data frame to store results
-res <- data.frame()
-# Loop through each threshold and calculate the proportion of rows with occurences > 0
-for(i in threshs) {
-  threshold_data <- aggregated_data %>%
-    dplyr::filter(RPM >= i) %>%
-    dplyr::group_by(RPM_cutoff = i) %>%
-    dplyr::summarise(proportion = sum(occurence_flag) / n(), .groups = "keep")
-  # Combine results for each threshold
-  res <- rbind(res, threshold_data)
-}
-# Plotting the results
-MS_support_by_thresh_plot <-
-  res %>% 
-  ggplot(aes(x = RPM_cutoff, y = proportion)) +
-  geom_smooth(method = "loess", span = 0.01, linewidth = 1, color = "steelblue") +
-  
-  ggtitle("Proportion of Transcripts with MS Support Across RPM Thresholds") +
-  scale_x_continuous(name = "Minimal mean expression (RPM) Cut-Off") +
-  scale_y_continuous(name = "Proportion of Transcripts with MS support", breaks = c(0.25, 0.50, 0.75, 1)) +
-  theme_bw() +
-  theme(
-    plot.title = element_text(face = "bold", size = 18, hjust = 0.5),
-    axis.title = element_text(face = "bold", size = 14),
-    axis.text = element_text(face = "bold", size = 12),
-    panel.border = element_rect(colour = "black", fill=NA, linewidth=1.5)
-  )
-
 
 # --------------------------------------------
 # Plot expression by gene
@@ -256,7 +222,7 @@ MS_support_by_thresh_plot <-
 # novel and supported by mass spec
 
 # generate total gene expression for each gene.
-# For denominator i use all transcripts regardles of MS support and for numerator i use novel with MS support
+# For denominator i use all transcripts regardless of MS support and for numerator i use novel with MS support
 
 # total expression
 total_gene_expression <- expression_gene_set %>%
@@ -277,10 +243,26 @@ prop_novel_expression <-
   replace(., is.na(.), 0) %>% 
   dplyr::mutate(novel_expression_perc = (RPM.y / RPM.x) *100)
 
+# create data frame of percentage novel expression
+summary_expression_df <- prop_novel_expression %>%
+  group_by(annot_gene_id.x, annot_gene_name) %>%
+  summarise(
+    mean_novel_expression_perc = mean(novel_expression_perc, na.rm = TRUE),
+    sd_novel_expression_perc = sd(novel_expression_perc, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  dplyr::rename(
+    annot_gene_id = annot_gene_id.x)
 
-highlight_genes <- c("AP2M1", "MFF", "DNM1", "ALG3", "IQSEC2", 
-                     "MAP2K1", "OXR1", "NARS", "NDUFAF2", "PACS2")
 
+# highlight the top 5 genes
+highlight_genes <- prop_novel_expression %>%
+  arrange(desc(novel_expression_perc)) %>%
+  distinct(annot_gene_name, .keep_all = TRUE) %>% 
+  slice_head(n = 5) %>%
+  pull(annot_gene_name)
+  
+  
 # plot all genes
 prop_novel_expression_all_plot <-
   prop_novel_expression %>% 
@@ -308,7 +290,7 @@ prop_novel_expression_all_plot <-
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
 
-# plot top 10 genes
+# plot top 5 genes
 prop_novel_expression_top_plot <-
   prop_novel_expression %>% 
   dplyr::filter(annot_gene_name %in% highlight_genes) %>%
@@ -369,7 +351,7 @@ ggsave(
   bg = "white"
 )
 
-# plot support by number of MS datasets (supplementary)
+# plot support by number of MS data sets (supplementary)
 ggsave(
   plot = transcripts_number_of_MS_data_support_plot, 
   filename = "04a_transcripts_number_of_MS_data_support_plot.svg", 
@@ -391,17 +373,6 @@ ggsave(
   bg = "white"
 )
 
-# plot support by RPM thresh
-ggsave(
-  plot = MS_support_by_thresh_plot, 
-  filename = "04a_MS_support_by_thresh_plot.svg", 
-  path = here::here("results", "plots"), 
-  width = 10, 
-  height = 6, 
-  dpi = 600, 
-  bg = "white"
-)
-
 # plot novel protein coding by gene
 ggsave(
   plot = prop_novel_expression_plot, 
@@ -414,8 +385,7 @@ ggsave(
 )
 
 # table with novel expression per sample
-prop_novel_expression %>%
-  select(!c(RPM.x, annot_gene_id.y, RPM.y)) %>%
+summary_expression_df %>%
   write.csv(here("results", "novel_expression.csv"), row.names = FALSE)
 
 
